@@ -10,11 +10,13 @@ CROSS_RATE = 0.7
 GENERATIONS = 100
 POPSIZE = 50
 class Schedule
+  attr_accessor :avail_table #testing only, delete me
   attr_accessor :schedule
   def initialize(emp, shifts)
     @emp = emp
     @shifts = shifts
     @avail_table = Array.new(7) {Array.new}
+    @schedule = Array.new(7) {Array.new}
   end
 
   class Chrom
@@ -39,6 +41,7 @@ class Schedule
           end
         end
         day << shiftarray
+        @schedule[d] << []
       end
     end
     calcChromLen
@@ -68,9 +71,18 @@ class Schedule
     
   end
 
-  def decode
-    sched = Array.new(7) {Array.new}
-
+  def decode(chrom)
+    loc = 0
+    @avail_table.each_with_index do |day, d| 
+      day.each_with_index do |shift, s| 
+        shift.each do |emp| 
+          if chrom[loc] == '1'
+            @schedule[d][s] << emp
+          end
+          loc += 1
+        end
+      end
+    end
   end
 
   def select(totalf)
@@ -159,6 +171,7 @@ class Schedule
       end
       @population = nextgen
     end
+    evalAllFitness
     @schedule = decode(findFittestChrom)
   end
 end
@@ -169,5 +182,5 @@ emp = [{name: 'Jack', role: :cook, avail: [[[6, 12], [15, 22]], [[5, 22]], [[3, 
 shifts = [[{time: [9, 11], cook: 2}, {time: [13, 14], cook: 2}], [{time: [6, 10], janitor: 2}, {time: [10, 15], cook: 1}], [{time: [11, 15], cook: 1}], [], [], [], []]
 s = Schedule.new(emp, shifts)
 s.init
+p s.avail_table
 p s.schedule
-p s.copySchedule
