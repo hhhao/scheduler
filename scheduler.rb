@@ -7,7 +7,7 @@
 
 MUTATE_RATE = 0.01
 CROSS_RATE = 0.7
-GENERATIONS = 100
+GENERATIONS = 10
 POPSIZE = 50
 class Schedule
   attr_accessor :avail_table #testing only, delete me
@@ -68,7 +68,7 @@ class Schedule
   end
 
   def calcFitness(chromstr)
-    return rand(0.0..100.0)
+    return rand(0.0..100.0) #Testing, replace with valid calculations
   end
 
   def decode(chrom)
@@ -88,7 +88,7 @@ class Schedule
   def select(totalf)
     loc = rand(0.0..totalf)
     currSum = 0.0
-    for i in 0...@popSize
+    for i in 0...POPSIZE
       currSum += @population[i].fitness
       if currSum >= loc
         return @population[i].chromstr
@@ -146,7 +146,8 @@ class Schedule
   end
 
   def findFittestChrom
-    maxFitness = -99999, mfchrom = ''
+    maxFitness = -99999
+    mfchrom = ''
     @population.each do |c, i|
       if c.fitness > maxFitness
         maxFitness = c.fitness
@@ -160,7 +161,8 @@ class Schedule
     genPopulation
     GENERATIONS.times do
       totalFit = evalAllFitness
-      nextgen = [], ngpop = 0
+      nextgen = []
+      ngpop = 0
       while ngpop < POPSIZE
         child1 = select(totalFit)
         child2 = select(totalFit)
@@ -168,6 +170,7 @@ class Schedule
         mutate(child1)
         mutate(child2)
         nextgen << Chrom.new(child1, nil) << Chrom.new(child2, nil)
+        ngpop += 2
       end
       @population = nextgen
     end
@@ -219,4 +222,5 @@ shifts = [
 s = Schedule.new(emp, shifts)
 s.init
 p s.avail_table
+s.evolution
 p s.schedule
