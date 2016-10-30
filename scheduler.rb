@@ -7,7 +7,7 @@
 
 MUTATE_RATE = 0.01
 CROSS_RATE = 0.7
-GENERATIONS = 10
+GENERATIONS = 100
 POPSIZE = 50
 class Schedule
   attr_accessor :avail_table #testing only, delete me
@@ -47,35 +47,42 @@ class Schedule
     calcChromLen
   end
 
-=begin
-  def copySchedule
-    newS = []
-    @avail_table.each_with_index do |day, d|
-      newS << []
-      day.each_with_index do |shift, s|
-        newS[d] << []
-        shift.each do |e|
-          newS[d][s] << e
-        end
-      end
-    end
-    return newS
-  end
-=end
-
   def calcChromLen
     @chromLen = @avail_table.flatten.length
   end
 
   def calcFitness(chromstr)
-    return rand(0.0..100.0) #Testing, replace with valid calculations
+    loc = 0
+    penalty = 0;
+    @avail_table.each_with_index do |day, d|
+      day.each_with_index do |shift, s|
+        role_count = {}
+        shift.each do |emp|
+          if chromstr[loc] == '1'
+            role_count[emp[:role]] ||= 0;
+            role_count[emp[:role]] += 1;
+          end
+          loc += 1
+        end
+        @shifts.keys.each do |role|
+          if role_count[role].nil?
+            penalty += 10
+          elsif role_count[role] < @shifts[role]
+            penalty += 5
+          elsif role_count[role] > @shifts[role]
+            return 0
+          end
+        end
+      end
+    end
+    return 1/(1 + penalty)
   end
 
   def decode(chrom)
     loc = 0
-    @avail_table.each_with_index do |day, d| 
-      day.each_with_index do |shift, s| 
-        shift.each do |emp| 
+    @avail_table.each_with_index do |day, d|
+      day.each_with_index do |shift, s|
+        shift.each do |emp|
           if chrom[loc] == '1'
             @schedule[d][s] << emp
           end
