@@ -57,20 +57,22 @@ class Schedule
     @avail_table.each_with_index do |day, d|
       day.each_with_index do |shift, s|
         role_count = {}
-        shift.each do |emp|
+        shift.each do |e|
           if chromstr[loc] == '1'
-            role_count[emp[:role]] ||= 0;
-            role_count[emp[:role]] += 1;
+            role_count[@emp[e][:role]] ||= 0;
+            role_count[@emp[e][:role]] += 1;
           end
           loc += 1
         end
-        @shifts.keys.each do |role|
-          if role_count[role].nil?
-            penalty += 10
-          elsif role_count[role] < @shifts[role]
-            penalty += 5
-          elsif role_count[role] > @shifts[role]
-            return 0
+        @shifts[d][s].keys.each do |role|
+          if role != :time
+            if role_count[role].nil?
+              penalty += 10
+            elsif role_count[role] < @shifts[d][s][role]
+              penalty += 5
+            elsif role_count[role] > @shifts[d][s][role]
+              return 0
+            end
           end
         end
       end
@@ -185,49 +187,3 @@ class Schedule
     decode(findFittestChrom)
   end
 end
-
-##############################
-emp = [{name: 'Jack', role: :cook, avail: [[[6, 12], [15, 22]],
-                                           [[5, 22]],
-                                           [[3, 12], [14, 22]],
-                                           [[3, 22]],
-                                           [[3, 22]],
-                                           [[3, 22]],
-                                           [[3, 22]]]
-       },
-       {name: 'Emily', role: :janitor, avail: [[[6, 12], [15, 22]],
-                                               [[5, 22]],
-                                               [[3, 12], [14, 22]],
-                                               [[3, 22]],
-                                               [[3, 22]],
-                                               [[3, 22]],
-                                               [[3, 22]]]
-       },
-       {name: 'Francis', role: :server, avail: [[[6, 12]],
-                                                [[5, 22]],
-                                                [[3, 22]],
-                                                [[3, 22]],
-                                                [[3, 22]],
-                                                [[3, 22]],
-                                                [[3, 22]]]
-       }
-      ]
-shifts = [
-  [{time: [9, 11], cook: 2},
-   {time: [13, 14], cook: 2}],
-  [{time: [6, 10], janitor: 2, server: 3},
-   {time: [10, 15], cook: 1, server: 2}],
-  [{time: [11, 15], cook: 1},
-   {time: [10, 15], cook: 1, server: 2}],
-  [{time: [11, 15], cook: 1}],
-  [{time: [11, 15], cook: 1}],
-  [{time: [11, 15], cook: 1},
-   {time: [10, 15], cook: 1, server: 2}],
-  [{time: [11, 15], cook: 1}]
-]
-
-s = Schedule.new(emp, shifts)
-s.init
-p s.avail_table
-s.evolution
-p s.schedule
