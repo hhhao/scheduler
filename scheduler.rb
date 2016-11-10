@@ -7,7 +7,7 @@
 
 MUTATE_RATE = 0.01
 CROSS_RATE = 0.7
-GENERATIONS = 100
+GENERATIONS = 1000
 POPSIZE = 50
 class Schedule
   attr_accessor :avail_table #testing only, delete me
@@ -67,9 +67,9 @@ class Schedule
         @shifts[d][s].keys.each do |role|
           if role != :time
             if role_count[role].nil?
-              penalty += 10
+              penalty += 100
             elsif role_count[role] < @shifts[d][s][role]
-              penalty += 5
+              penalty += 50
             elsif role_count[role] > @shifts[d][s][role]
               return 0
             end
